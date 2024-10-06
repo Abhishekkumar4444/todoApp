@@ -1,4 +1,4 @@
-import { takeEvery, call, put } from 'redux-saga/effects';
+import {takeEvery, call, put} from 'redux-saga/effects';
 import axios from 'axios';
 import {
   fetchTodosRequest,
@@ -21,7 +21,7 @@ const API_URL = 'https://jsonplaceholder.typicode.com/todos';
 function* fetchTodos() {
   try {
     const response = yield call(axios.get, API_URL);
-    yield put(fetchTodosSuccess(response.data.slice(0,4)));
+    yield put(fetchTodosSuccess(response.data.slice(0, 4)));
   } catch (error) {
     yield put(fetchTodosFailure(error.message));
   }
@@ -40,9 +40,14 @@ function* addTodo(action) {
 // Update a Todo
 function* updateTodo(action) {
   try {
-    const response = yield call(axios.put, `${API_URL}/${action.payload.id}`, action.payload);
+    const response = yield call(
+      axios.put,
+      `${API_URL}/${action.payload.id}`,
+      action.payload,
+    );
     yield put(updateTodoSuccess(response.data));
   } catch (error) {
+    console.log(error);
     yield put(updateTodoFailure(error.message));
   }
 }

@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit';
+import {createSlice} from '@reduxjs/toolkit';
 
 const initialState = {
   todos: [],
@@ -11,7 +11,7 @@ const todoSlice = createSlice({
   initialState,
   reducers: {
     // Fetch Todos
-    fetchTodosRequest: (state) => {
+    fetchTodosRequest: state => {
       state.loading = true;
     },
     fetchTodosSuccess: (state, action) => {
@@ -23,7 +23,7 @@ const todoSlice = createSlice({
       state.error = action.payload;
     },
     // Add Todo
-    addTodoRequest: (state) => {
+    addTodoRequest: state => {
       state.loading = true;
     },
     addTodoSuccess: (state, action) => {
@@ -35,12 +35,12 @@ const todoSlice = createSlice({
       state.error = action.payload;
     },
     // Update Todo
-    updateTodoRequest: (state) => {
+    updateTodoRequest: state => {
       state.loading = true;
     },
     updateTodoSuccess: (state, action) => {
       state.loading = false;
-      const index = state.todos.findIndex((todo) => todo.id === action.payload.id);
+      const index = state.todos.findIndex(todo => todo.id == action.payload.id);
       state.todos[index] = action.payload;
     },
     updateTodoFailure: (state, action) => {
@@ -48,12 +48,12 @@ const todoSlice = createSlice({
       state.error = action.payload;
     },
     // Delete Todo
-    deleteTodoRequest: (state) => {
+    deleteTodoRequest: state => {
       state.loading = true;
     },
     deleteTodoSuccess: (state, action) => {
       state.loading = false;
-      state.todos = state.todos.filter((todo) => todo.id !== action.payload);
+      state.todos = state.todos.filter(todo => todo.id !== action.payload);
     },
     deleteTodoFailure: (state, action) => {
       state.loading = false;

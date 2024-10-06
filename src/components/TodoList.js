@@ -36,7 +36,12 @@ const TodoList = () => {
 
   const handleUpdateTodo = () => {
     if (editingTodo) {
-      dispatch(updateTodoRequest({...editingTodo, title: todoText}));
+      dispatch(
+        updateTodoRequest({
+          ...editingTodo,
+          title: todoText,
+        }),
+      );
       setTodoText('');
       setEditingTodo(null);
     }
@@ -107,7 +112,7 @@ const TodoList = () => {
             alignSelf: 'center',
             marginTop: 10,
           }}>
-          <Text style={styles.error}>Error: {error}</Text>{' '}
+          <Text style={styles.error}>Error: {error}</Text>
         </View>
       ) : null}
     </View>
