@@ -5,5 +5,7 @@ src/
 ├── redux/
 │   ├── store.js
 │   ├── todoSlice.js
-│   └── todoSaga.js
+│   ├── rootSaga.js
+│   ├── sagas.js
+│   └── rootReducer.js
 └── App.js
