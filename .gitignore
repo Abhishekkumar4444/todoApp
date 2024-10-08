@@ -61,8 +61,8 @@ buck-out/
 # Bundle artifact
 *.jsbundle
 
-# # testing
-# /coverage
+
+
 
 # Ruby / CocoaPods
 /ios/Pods/

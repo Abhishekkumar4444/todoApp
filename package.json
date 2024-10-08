@@ -8,7 +8,7 @@
     "lint": "eslint .",
     "start": "react-native start",
     "start-android": "npm-run-all -p start android",
-    "test": "jest"
+    "test": "jest --clearCache && jest"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.2.7",
