@@ -1,9 +1,9 @@
 // App.js
 import React from 'react';
-import {Provider} from 'react-redux';
 import {SafeAreaView, StyleSheet} from 'react-native';
-import store from '../todoApp/src/redux/store';
+import {Provider} from 'react-redux';
 import TodoList from '../todoApp/src/components/TodoList';
+import store from '../todoApp/src/redux/store';
 
 const App = () => {
   return (
