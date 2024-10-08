@@ -1,7 +1,10 @@
 {
-  "prettier.configPath": ".prettierrc.js",
+  "prettier.configPath": ".prettierrc",
   "reactSnippets.settings.prettierEnabled": true,
   "reactSnippets.settings.prettierEnabled": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.formatOnPaste": true
+  "editor.formatOnPaste": true,
+  "notebook.defaultFormatter": "esbenp.prettier-vscode",
+  "prettier.requireConfig": true,
+  "files.autoSave": "onFocusChange"
 }
