@@ -65,7 +65,7 @@ describe('TodoList', () => {
     }));
   });
 
-  it('renders the TodoList component correctly', () => {
+  it('should renders the TodoList component correctly', () => {
     const {getByPlaceholderText, getByText} = render(
       <Provider store={store}>
         <TodoList />
@@ -77,7 +77,7 @@ describe('TodoList', () => {
     expect(getByText('Add Todo')).toBeTruthy();
   });
 
-  it('dispatches addTodoRequest when adding a todo', async () => {
+  it('should dispatches addTodoRequest when adding a todo', async () => {
     const {getByPlaceholderText, getByText} = render(
       <Provider store={store}>
         <TodoList />
@@ -95,7 +95,7 @@ describe('TodoList', () => {
     });
   });
 
-  it('dispatches deleteTodoRequest when deleting a todo', async () => {
+  it('should dispatches deleteTodoRequest when deleting a todo', async () => {
     // Set up the initial state with a todo
     store = mockStore({
       todos: {
@@ -118,7 +118,7 @@ describe('TodoList', () => {
     expect(todoSlice.deleteTodoRequest).toHaveBeenCalledWith(1);
   });
 
-  it('dispatches updateTodoRequest when updating a todo', async () => {
+  it('should dispatches updateTodoRequest when updating a todo', async () => {
     // Set up the initial state with a todo for editing
     store = mockStore({
       todos: {
@@ -151,7 +151,7 @@ describe('TodoList', () => {
     });
   });
 
-  it('displays loading indicator when loading todos', () => {
+  it('should displays loading indicator when loading todos', () => {
     // Set the loading state
     store = mockStore({
       todos: {
@@ -171,7 +171,7 @@ describe('TodoList', () => {
     expect(getByText('Loading.....')).toBeTruthy();
   });
 
-  it('displays error message when there is an error', () => {
+  it('should displays error message when there is an error', () => {
     // Set the error state
     store = mockStore({
       todos: {
