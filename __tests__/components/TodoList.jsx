@@ -25,7 +25,7 @@ describe('TodoList', () => {
       },
     });
 
-    // Mock all necessary actions
+    // Mock all necessary dispatch actions
     mockAction('fetchTodosRequest');
     mockAction('addTodoRequest');
     mockAction('updateTodoRequest');
