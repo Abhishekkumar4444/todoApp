@@ -1,18 +1,18 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
-  View,
-  Text,
-  TextInput,
   Button,
   FlatList,
   StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from 'react-native';
 import {useDispatch, useSelector} from 'react-redux';
 import {
-  fetchTodosRequest,
   addTodoRequest,
-  updateTodoRequest,
   deleteTodoRequest,
+  fetchTodosRequest,
+  updateTodoRequest,
 } from '../redux/todoSlice';
 
 const TodoList = () => {
@@ -51,8 +51,7 @@ const TodoList = () => {
     dispatch(deleteTodoRequest(id));
   };
 
-
-  const  renderTodoItem = ({item}) => (
+  const renderTodoItem = ({item}) => (
     <View style={styles.todoItem}>
       <View style={{flex: 2}}>
         <Text>{item.title}</Text>
@@ -75,8 +74,6 @@ const TodoList = () => {
       </View>
     </View>
   );
-
-
 
   return (
     <View style={styles.container}>
@@ -110,6 +107,7 @@ const TodoList = () => {
       )}
       {error ? (
         <View
+          testID="error-view"
           style={{
             justifyContent: 'center',
             alignSelf: 'center',
