@@ -8,7 +8,8 @@
     "lint": "eslint .",
     "start": "react-native start",
     "start-android": "npm-run-all -p start android",
-    "test": "jest --clearCache && jest"
+    "test": "jest --clearCache && jest",
+    "clearCache": "npm cache clean --force"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.2.7",
@@ -31,11 +32,13 @@
     "@testing-library/react-native": "^12.7.2",
     "@types/react": "^18.2.6",
     "@types/react-test-renderer": "^18.0.0",
+    "axios-mock-adapter": "^2.1.0",
     "babel-jest": "^29.6.3",
     "eslint": "^8.19.0",
-    "jest": "^29.6.3",
+    "jest": "^29.7.0",
     "prettier": "2.8.8",
     "react-test-renderer": "18.3.1",
+    "redux-saga-test-plan": "^4.0.6",
     "typescript": "5.0.4"
   },
   "engines": {

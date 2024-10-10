@@ -1,24 +1,24 @@
-import {takeEvery, call, put} from 'redux-saga/effects';
 import axios from 'axios';
+import {call, put, takeEvery} from 'redux-saga/effects';
 import {
-  fetchTodosRequest,
-  fetchTodosSuccess,
-  fetchTodosFailure,
+  addTodoFailure,
   addTodoRequest,
   addTodoSuccess,
-  addTodoFailure,
-  updateTodoRequest,
-  updateTodoSuccess,
-  updateTodoFailure,
+  deleteTodoFailure,
   deleteTodoRequest,
   deleteTodoSuccess,
-  deleteTodoFailure,
+  fetchTodosFailure,
+  fetchTodosRequest,
+  fetchTodosSuccess,
+  updateTodoFailure,
+  updateTodoRequest,
+  updateTodoSuccess,
 } from './todoSlice';
 
 const API_URL = 'https://jsonplaceholder.typicode.com/todos';
 
 // Fetch Todos
-function* fetchTodos() {
+export function* fetchTodos() {
   try {
     const response = yield call(axios.get, API_URL);
     yield put(fetchTodosSuccess(response.data.slice(0, 4)));
@@ -28,7 +28,7 @@ function* fetchTodos() {
 }
 
 // Add a Todo
-function* addTodo(action) {
+export function* addTodo(action) {
   try {
     const response = yield call(axios.post, API_URL, action.payload);
     yield put(addTodoSuccess(response.data));
@@ -38,7 +38,7 @@ function* addTodo(action) {
 }
 
 // Update a Todo
-function* updateTodo(action) {
+export function* updateTodo(action) {
   try {
     const response = yield call(
       axios.put,
@@ -53,7 +53,7 @@ function* updateTodo(action) {
 }
 
 // Delete a Todo
-function* deleteTodo(action) {
+export function* deleteTodo(action) {
   try {
     yield call(axios.delete, `${API_URL}/${action.payload}`);
     yield put(deleteTodoSuccess(action.payload));
