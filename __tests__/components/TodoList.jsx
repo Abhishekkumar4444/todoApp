@@ -1,332 +1,222 @@
 import {fireEvent, render} from '@testing-library/react-native';
 import React from 'react';
-import {Provider} from 'react-redux';
-import configureStore from 'redux-mock-store';
-import TodoList from '../../src/components/TodoList'; // Update the path as necessary
-import * as todoSlice from '../../src/redux/todoSlice'; // Import the slice
+import {useDispatch, useSelector} from 'react-redux';
+import TodoList from '../../src/components/TodoList'; // Adjust this path
+import {
+  addTodoRequest,
+  deleteTodoRequest,
+  fetchTodosRequest,
+  updateTodoRequest,
+} from '../../src/redux/todoSlice';
 
-const mockStore = configureStore([]);
-let store;
+jest.mock('react-redux', () => ({
+  useDispatch: jest.fn(),
+  useSelector: jest.fn(),
+}));
 
-const mockAction = (actionName, payload) => {
-  return jest.spyOn(todoSlice, actionName).mockImplementation(() => ({
-    type: actionName,
-    payload,
-  }));
-};
-describe('TodoList', () => {
+describe('TodoList Component', () => {
+  const mockDispatch = jest.fn();
+
   beforeEach(() => {
-    // Create a mock store before each test
-    store = mockStore({
-      todos: {
-        todos: [], // Initial todos array
-        loading: false,
-        error: null,
-      },
-    });
-
-    // Mock all necessary dispatch actions
-    mockAction('fetchTodosRequest');
-    mockAction('addTodoRequest');
-    mockAction('updateTodoRequest');
-    mockAction('deleteTodoRequest');
-    mockAction('fetchTodosSuccess');
-    mockAction('fetchTodosFailure');
-    mockAction('addTodoSuccess');
-    mockAction('addTodoFailure');
-    mockAction('updateTodoSuccess');
-    mockAction('updateTodoFailure');
-    mockAction('deleteTodoSuccess');
-    mockAction('deleteTodoFailure');
+    useDispatch.mockReturnValue(mockDispatch);
+    useSelector.mockImplementation(callback =>
+      callback({
+        todos: {
+          todos: [
+            {id: 1, title: 'Learn React Native', completed: false},
+            {id: 2, title: 'Build a Todo App', completed: false},
+          ],
+          loading: false,
+          error: null,
+        },
+      }),
+    );
   });
+
   afterEach(() => {
-    jest.clearAllMocks(); // Clear mocks after each test to avoid interference
+    jest.clearAllMocks();
   });
 
-  it('should display todos when fetch is successful', () => {
-    // Set up the store with todos
-    const initialTodos = [{id: 1, title: 'Fetched Todo', completed: false}];
+  /**
+   * 1. UI Testing: Ensure all UI components are rendered correctly
+   */
 
-    store = mockStore({
-      todos: {
-        todos: initialTodos,
-        loading: false,
-        error: null,
-      },
-    });
+  it('should render input field and buttons', () => {
+    const {getByPlaceholderText, getByText} = render(<TodoList />);
 
-    const {getByText} = render(
-      <Provider store={store}>
-        <TodoList />
-      </Provider>,
-    );
+    expect(getByPlaceholderText('Enter Todo')).toBeTruthy();
+    expect(getByText('Add Todo')).toBeTruthy();
 
-    expect(getByText('Fetched Todo')).toBeOnTheScreen();
+    // const {debug} = render(<TodoList />);
+    // debug(); This will log the current DOM state, allowing you to see what text is rendered
   });
-  it('should dispatches addTodoRequest when adding a todo', async () => {
-    const {getByPlaceholderText, getByText} = render(
-      <Provider store={store}>
-        <TodoList />
-      </Provider>,
-    );
 
-    // Simulate adding a todo
+  it('should render todos correctly', () => {
+    const {getByText} = render(<TodoList />);
+
+    expect(getByText('Learn React Native')).toBeTruthy();
+    expect(getByText('Build a Todo App')).toBeTruthy();
+  });
+
+  it('should render Edit and Delete buttons for each todo', () => {
+    const {getAllByText} = render(<TodoList />);
+    const editButtons = getAllByText('Edit');
+    const deleteButtons = getAllByText('Delete');
+
+    expect(editButtons.length).toBe(2);
+    expect(deleteButtons.length).toBe(2);
+  });
+
+  /**
+   * 2. Data Handling Tests: Ensure correct data flow (fetching and updating data)
+   */
+
+  it('should dispatch fetchTodosRequest on mount', () => {
+    render(<TodoList />);
+
+    expect(mockDispatch).toHaveBeenCalledWith(fetchTodosRequest());
+  });
+
+  it('should dispatch addTodoRequest when a new todo is added', () => {
+    const {getByPlaceholderText, getByText} = render(<TodoList />);
+
     const input = getByPlaceholderText('Enter Todo');
-    fireEvent.changeText(getByPlaceholderText('Enter Todo'), 'New Todo');
+    fireEvent.changeText(input, 'New Todo');
     fireEvent.press(getByText('Add Todo'));
 
-    // Check if addTodoRequest action is dispatched with the correct payload
-    expect(todoSlice.addTodoRequest).toHaveBeenCalledWith({
-      title: 'New Todo',
-      completed: false,
-    });
-    expect(input.props.value).toBe('');
+    expect(mockDispatch).toHaveBeenCalledWith(
+      addTodoRequest({title: 'New Todo', completed: false}),
+    );
   });
 
-  it('should not dispatch addTodoRequest when input is empty', () => {
-    const {getByPlaceholderText, getByText} = render(
-      <Provider store={store}>
-        <TodoList />
-      </Provider>,
-    );
+  it('should dispatch updateTodoRequest when an existing todo is updated', () => {
+    const {getAllByText, getByPlaceholderText} = render(<TodoList />);
 
-    // Get the input field and button
+    const editButtons = getAllByText('Edit');
+    fireEvent.press(editButtons[0]); // Press the "Edit" button for the first todo
+
     const input = getByPlaceholderText('Enter Todo');
+    fireEvent.changeText(input, 'Updated Todo');
+    fireEvent.press(getAllByText('Update Todo')[0]); // Press the first "Update Todo" button
 
-    // Simulate an empty input
-    fireEvent.changeText(input, ''); // Set input to an empty string
-    fireEvent.press(getByText('Add Todo')); // Simulate button press
-
-    // Check that addTodoRequest was not called
-    expect(todoSlice.addTodoRequest).not.toHaveBeenCalled();
+    expect(mockDispatch).toHaveBeenCalledWith(
+      updateTodoRequest({
+        id: 1,
+        title: 'Updated Todo',
+        completed: false,
+      }),
+    );
   });
 
-  it('should dispatches deleteTodoRequest when deleting a todo', async () => {
-    // Set up the initial state with a todo
-    store = mockStore({
-      todos: {
-        todos: [{id: 1, title: 'Test Todo', completed: false}],
-        loading: false,
-        error: null,
-      },
-    });
+  it('should dispatch deleteTodoRequest when Delete is pressed', () => {
+    const {getAllByText} = render(<TodoList />);
 
-    const {getByText} = render(
-      <Provider store={store}>
-        <TodoList />
-      </Provider>,
-    );
+    const deleteButtons = getAllByText('Delete');
+    fireEvent.press(deleteButtons[0]); // Press the first Delete button
 
-    // Simulate deleting the todo
-    fireEvent.press(getByText('Delete'));
-
-    // Check if deleteTodoRequest action is dispatched with the correct ID
-    expect(todoSlice.deleteTodoRequest).toHaveBeenCalledWith(1);
+    expect(mockDispatch).toHaveBeenCalledWith(deleteTodoRequest(1));
   });
 
-  it('should dispatches updateTodoRequest when updating a todo', async () => {
-    // Set up the initial state with a todo for editing
-    store = mockStore({
-      todos: {
-        todos: [{id: 1, title: 'Test Todo', completed: false}],
-        loading: false,
-        error: null,
-      },
-    });
+  /**
+   * 3. Logic Tests: Ensure the component's logic works as expected
+   */
 
-    const {getByText, getByPlaceholderText} = render(
-      <Provider store={store}>
-        <TodoList />
-      </Provider>,
-    );
+  it('should clear input field after adding a todo', () => {
+    const {getByPlaceholderText, getByText} = render(<TodoList />);
 
-    // Simulate editing the todo
     const input = getByPlaceholderText('Enter Todo');
-    fireEvent.press(getByText('Edit'));
+    fireEvent.changeText(input, 'New Todo');
+    fireEvent.press(getByText('Add Todo'));
 
-    // Change the text in the input field
-    fireEvent.changeText(getByPlaceholderText('Enter Todo'), 'Updated Todo');
+    expect(input.props.value).toBe(''); // Expect input to be cleared
+  });
 
-    // Simulate updating the todo
+  it('should dispatch updateTodoRequest when an existing todo is updated', () => {
+    const {getAllByText, getByPlaceholderText} = render(<TodoList />);
+
+    const editButtons = getAllByText('Edit');
+    fireEvent.press(editButtons[0]); // Press the first Edit button
+
+    const input = getByPlaceholderText('Enter Todo');
+    expect(input.props.value).toBe('Learn React Native'); // Input should be populated with todo text
+  });
+
+  it('should return to add mode after updating a todo', () => {
+    const {getAllByText, getByPlaceholderText, getByText} = render(
+      <TodoList />,
+    );
+
+    const editButtons = getAllByText('Edit');
+    fireEvent.press(editButtons[0]); // Press the first "Edit" button
+
+    const input = getByPlaceholderText('Enter Todo');
+    fireEvent.changeText(input, 'Updated Todo');
     fireEvent.press(getByText('Update Todo'));
 
-    // Check if updateTodoRequest action is dispatched with the correct payload
-    expect(todoSlice.updateTodoRequest).toHaveBeenCalledWith({
-      id: 1,
-      title: 'Updated Todo',
-      completed: false,
-    });
-
-    expect(input.props.value).toBe('');
+    expect(getByText('Add Todo')).toBeTruthy(); // Button should switch back to Add mode
   });
 
-  it('should displays loading indicator when loading todos', () => {
-    // Set the loading state
-    store = mockStore({
-      todos: {
-        todos: [],
-        loading: true,
-        error: null,
-      },
-    });
+  /**
+   * 4. Edge Cases: Handle empty input, loading state, error state, etc.
+   */
 
-    const {getByText} = render(
-      <Provider store={store}>
-        <TodoList />
-      </Provider>,
+  it('should not add a todo if input is empty', () => {
+    const {getByText} = render(<TodoList />);
+
+    fireEvent.press(getByText('Add Todo'));
+
+    expect(mockDispatch).not.toHaveBeenCalledWith(
+      addTodoRequest(expect.any(Object)),
     );
-
-    // Check for loading text
-    expect(getByText('Loading.....')).toBeOnTheScreen();
   });
 
-  it('should render FlatList with the correct number of todo items', () => {
-    // Set up the initial state with multiple todos
-    const initialTodos = [
-      {id: 1, title: 'Test Todo 1', completed: false},
-      {id: 2, title: 'Test Todo 2', completed: false},
-      {id: 3, title: 'Test Todo 3', completed: false},
-    ];
-
-    // Create a mock store with these todos
-    store = mockStore({
-      todos: {
-        todos: initialTodos,
-        loading: false,
-        error: null,
-      },
-    });
-
-    const {getByText} = render(
-      <Provider store={store}>
-        <TodoList />
-      </Provider>,
+  it('should display loading indicator when loading is true', () => {
+    useSelector.mockImplementation(callback =>
+      callback({
+        todos: {
+          todos: [],
+          loading: true,
+          error: null,
+        },
+      }),
     );
 
-    // Assertions to check if the FlatList renders the correct number of items
-    expect(getByText('Test Todo 1')).toBeOnTheScreen();
-    expect(getByText('Test Todo 2')).toBeOnTheScreen();
-    expect(getByText('Test Todo 3')).toBeOnTheScreen();
+    const {getByText} = render(<TodoList />);
+    expect(getByText('Loading.....')).toBeTruthy();
   });
 
-  it('should display the todo items correctly in the FlatList', () => {
-    // Set up the initial state with todos
-    const initialTodos = [
-      {id: 1, title: 'Test Todo 1', completed: false},
-      {id: 2, title: 'Test Todo 2', completed: true},
-    ];
-
-    // Create a mock store with these todos
-    store = mockStore({
-      todos: {
-        todos: initialTodos,
-        loading: false,
-        error: null,
-      },
-    });
-
-    const {getByText} = render(
-      <Provider store={store}>
-        <TodoList />
-      </Provider>,
+  it('should display error message when error is present', () => {
+    useSelector.mockImplementation(callback =>
+      callback({
+        todos: {
+          todos: [],
+          loading: false,
+          error: 'Failed to fetch todos',
+        },
+      }),
     );
 
-    // Assertions to check if the todo items are rendered correctly
-    expect(getByText('Test Todo 1')).toBeOnTheScreen(); // Check first todo
-    expect(getByText('Test Todo 2')).toBeOnTheScreen(); // Check second todo
+    const {getByText} = render(<TodoList />);
+
+    expect(getByText('Error: Failed to fetch todos')).toBeTruthy();
   });
-
-  it('should dispatch updateTodoRequest with correct payload on Edit button click', async () => {
-    // Set up the initial state with a todo
-    const initialTodos = [{id: 1, title: 'Initial Todo', completed: false}];
-
-    store = mockStore({
-      todos: {
-        todos: initialTodos,
-        loading: false,
-        error: null,
-      },
-    });
-
-    const {getByText, getByPlaceholderText} = render(
-      <Provider store={store}>
-        <TodoList />
-      </Provider>,
+  it('should not display todo which is deleted ', () => {
+    useSelector.mockImplementation(callback =>
+      callback({
+        todos: {
+          todos: [
+            {id: 1, title: 'First todo', completed: false},
+            {id: 2, title: 'Second todo', completed: false},
+          ],
+          loading: false,
+          error: '',
+        },
+      }),
     );
 
-    // Simulate pressing the Edit button
-    fireEvent.press(getByText('Edit'));
-
-    // Update the todo title
-    fireEvent.changeText(getByPlaceholderText('Enter Todo'), 'Edited Todo');
-    fireEvent.press(getByText('Update Todo'));
-
-    // Check if updateTodoRequest action is dispatched with the correct payload
-    expect(todoSlice.updateTodoRequest).toHaveBeenCalledWith({
-      id: 1,
-      title: 'Edited Todo',
-      completed: false,
-    });
-  });
-
-  it('should dispatch deleteTodoRequest with correct id on Delete button click', async () => {
-    // Set up the initial state with a todo
-    const initialTodos = [{id: 1, title: 'Todo to Delete', completed: false}];
-
-    store = mockStore({
-      todos: {
-        todos: initialTodos,
-        loading: false,
-        error: null,
-      },
-    });
-
-    const {getByText} = render(
-      <Provider store={store}>
-        <TodoList />
-      </Provider>,
-    );
-
-    // Simulate pressing the Delete button
-    fireEvent.press(getByText('Delete'));
-
-    // Check if deleteTodoRequest action is dispatched with the correct id
-    expect(todoSlice.deleteTodoRequest).toHaveBeenCalledWith(1);
-  });
-
-  it('should displays error message when there is an error', () => {
-    // Set the error state
-    const errorMessage = 'Something went wrong';
-
-    // Set the error state
-    store = mockStore({
-      todos: {
-        todos: [],
-        loading: false,
-        error: errorMessage,
-      },
-    });
-
-    const {getByTestId} = render(
-      <Provider store={store}>
-        <TodoList />
-      </Provider>,
-    );
-
-    // Check for error message
-    const errorView = getByTestId('error-view');
-    expect(errorView).toBeTruthy(); // Ensure the error view is rendered
-    expect(errorView).toHaveTextContent(`Error: ${errorMessage}`); // Use the dynamic error message
-  });
-
-  it('should not render error message when there is no error', () => {
-    const {queryByTestId} = render(
-      <Provider store={store}>
-        <TodoList />
-      </Provider>,
-    );
-
-    // Ensure the error view is not rendered
-    expect(queryByTestId('error-view')).toBeNull();
+    const {getByText} = render(<TodoList />);
+    const deleteButton = getByText('Delete');
+    fireEvent.press(deleteButton[0]);
+    expect(getByText('First todo')).toBeNull();
   });
 });
