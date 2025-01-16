@@ -26,6 +26,7 @@ describe('Todo Sagas', () => {
   let dispatchedActions;
 
   beforeEach(() => {
+    console.log('beforeEach');
     dispatchedActions = [];
   });
 

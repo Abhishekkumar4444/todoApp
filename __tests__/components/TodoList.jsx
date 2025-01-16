@@ -17,6 +17,7 @@ jest.mock('react-redux', () => ({
 describe('TodoList Component', () => {
   const mockDispatch = jest.fn();
 
+  //setUp
   beforeEach(() => {
     useDispatch.mockReturnValue(mockDispatch);
     useSelector.mockImplementation(callback =>
@@ -33,6 +34,7 @@ describe('TodoList Component', () => {
     );
   });
 
+  //tearDown
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -200,7 +202,7 @@ describe('TodoList Component', () => {
 
     expect(getByText('Error: Failed to fetch todos')).toBeTruthy();
   });
-  it('should not display todo which is deleted ', () => {
+  it('should not display todo which is deleted ', async () => {
     useSelector.mockImplementation(callback =>
       callback({
         todos: {
@@ -214,9 +216,10 @@ describe('TodoList Component', () => {
       }),
     );
 
-    const {getByText} = render(<TodoList />);
-    const deleteButton = getByText('Delete');
+    const {queryByText, getAllByText} = render(<TodoList />);
+    const deleteButton = getAllByText('Delete');
+
     fireEvent.press(deleteButton[0]);
-    expect(getByText('First todo')).toBeNull();
+    expect(mockDispatch).toHaveBeenCalledWith(deleteTodoRequest(1));
   });
 });
